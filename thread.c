@@ -208,6 +208,10 @@ thread_create (const char *name, int priority,
 
   /* Add to run queue. */
   thread_unblock (t);
+  
+/*modify by jinxin for alarm-clock*/
+  t->ticks_blocked = 0;
+/*modify e*/
 
   return tid;
 }
@@ -421,6 +425,20 @@ idle (void *idle_started_ UNUSED)
       asm volatile ("sti; hlt" : : : "memory");
     }
 }
+
+/*add by jinxin for alarm-clock*/
+void
+blocked_thread_check (struct thread *t,void *aux UNUSED)
+{
+  if(t->status ==THREAD_BLOCKED && t->ticks_blocked>0)
+  {
+     t->ticks_blocked--;
+     if(t->ticks_blocked==0){
+        thread_unblock(t);
+      }
+   }
+}
+/*add e*/
 
 /* Function used as the basis for a kernel thread. */
 static void
